@@ -10,30 +10,27 @@ import React, {Component} from 'react';
 import { _ } from 'lodash'
 import {Platform, StyleSheet, Text, View, ScrollView, TextInput, SafeAreaView} from 'react-native';
 import Pokemon from './App/components/Pokemon'
+import Content from './App/container/Content'
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+// const instructions = Platform.select({
+//   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
+//   android:
+//     'Double tap R on your keyboard to reload,\n' +
+//     'Shake or press menu button for dev menu',
+// });
 
 const baseURL = 'http://pokeapi.co/api/v2/'
 
 
 type Props = {};
 export default class App extends Component<Props> {
-  constructor(props){
-    super(props)
-    this.state = {
-       pokemons: [],
-       searchTerm: 'Pokemon Name'
-     }
-    
-    //  this.search = _.debounce(this.search, 3000)
-
-  }
  
+  state = {
+    pokemons: [],
+    searchTerm: '',
+    filterBy: 'name'
+  }
+  
   componentDidMount() {
     this.getPokemon()
   }
@@ -46,14 +43,13 @@ export default class App extends Component<Props> {
     })
   }
 
-  getPokes = () => {
-    if(this.state.pokemons.length !== 0) {
-      console.log(this.state)
-      return this.state.pokemons.results.map(pokemon => {
-        // console.log(pokemon);
-        // return <Pokemon name={pokemon}/>
-        return <Pokemon key={pokemon.name} name={pokemon.name} />
+  getPokesAndFilter = () => {
+    const { pokemons, searchTerm, filterBy } = this.state
+    if(pokemons.length !== 0) {
+      const filteredPoke = pokemons.results.filter(pokemon => {
+        return pokemon[filterBy].includes(searchTerm.toLowerCase())
       })
+      return filteredPoke
     }
   }
   
@@ -61,20 +57,20 @@ export default class App extends Component<Props> {
   search = (searchTerm) => {
     this.setState({searchTerm})
   }
-  
+
 
 
   render() {
-    // console.log(this.state)
+    const { search, getPokesAndFilter} = this
+    const { searchTerm } = this.state
     return (
       <SafeAreaView>
         <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
           <TextInput 
           style={{height: 40, borderColor: 'gray', borderWidth: 1}}
-          // onChangeText={(searchTerm) =>  _.debounce(this.setState({searchTerm}), 3000)}
-          onChangeText={this.search}
-          value={this.state.searchTerm} />
-          {this.getPokes()} 
+          onChangeText={search}
+          value={searchTerm} />
+          <Content filteredPokemons={getPokesAndFilter()} />
         </ScrollView>
       </SafeAreaView>
      
